@@ -17,8 +17,9 @@ import celery.bootsteps as bootsteps
 import kombu
 import kombu.message
 import kombu.common as common
+from event_consumer import settings
 
-from event_consumer.conf import settings
+
 from event_consumer.errors import InvalidQueueRegistration, NoExchange, PermanentFailure
 from event_consumer.types import HandlerRegistration, QueueKey
 
@@ -443,14 +444,32 @@ class AMQPRetryHandler(object):
         """
         Put the message onto the archive queue
         """
-        _logger.warning(reason)
         try:
-            self.archive_producer.publish(
-                body,
-                headers=message.headers,
-                retry=True,
-                declares=[self.archive_queue],
-            )
+            dlx_name = settings.DEAD_LETTER_EXCHANGE.get('exchange', DEFAULT_EXCHANGE)
+            dlx_postfix = settings.DEAD_LETTER_EXCHANGE.get('exchangePostfix', '')
+            dlx_rounting_key_name = settings.DEAD_LETTER_EXCHANGE.get('routingKey', '{queue}.archived'.format(queue=self.queue))
+            dlx_rounting_key_postfix = settings.DEAD_LETTER_EXCHANGE.get('routingKeyPostfix', '')
+            dlx = body.get(dlx_name, '') + dlx_postfix
+            dlx_routing_key = body.get(dlx_rounting_key_name, '') + dlx_rounting_key_postfix
+            if body.get(dlx_rounting_key_name, None) is not None:
+                archive_producer = kombu.Producer(
+                    self.channel,
+                    exchange=kombu.Exchange(name=dlx, type='topic', channel=self.channel),
+                    routing_key=dlx_routing_key,
+                    serializer=settings.SERIALIZER,
+                )
+                archive_producer.publish(
+                    body,
+                    headers=message.headers,
+                    retry=True,
+                )
+            else:
+                self.archive_producer.publish(
+                    body,
+                    headers=message.headers,
+                    retry=True,
+                    declares=[self.archive_queue],
+                )
 
         except Exception as e:
             message.requeue()
