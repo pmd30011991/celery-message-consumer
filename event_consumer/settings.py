@@ -2,7 +2,7 @@
 import os
 from datetime import timedelta
 from django.conf import settings
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dowjones2.settings')
+
 
 def get(key, default):
     return getattr(settings,"EVENT_CONSUMER_" + key, default)
