@@ -51,4 +51,4 @@ EXCHANGES = get('EXCHANGES', {})   # type: Dict[str, Dict[str, str]]
 TASK_DEFAULT_QUEUE = get('TASK_DEFAULT_QUEUE', 'dj2.listener')
 USE_DJANGO = get('USE_DJANGO', True)
 QUEUE_NAME = get('QUEUE_NAME','')
-MAX_RETRIES = get('MAX_RETRIES',4)
+MAX_RETRIES = get('MAX_RETRIES',7)
