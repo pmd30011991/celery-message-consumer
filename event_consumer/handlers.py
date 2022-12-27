@@ -182,14 +182,14 @@ class AMQPRetryConsumerStep(bootsteps.StartStopStep):
 
     def _close(self, c, cancel_consumers=True):
         _logger.debug('Close Consumer');
-        # channels = set()
-        # for handler in self.handlers:
-        #     if cancel_consumers:
-        #         common.ignore_errors(c.connection, handler.consumer.cancel)
-        #     if handler.consumer.channel:
-        #         channels.add(handler.consumer.channel)
-        # for channel in channels:
-        #     common.ignore_errors(c.connection, channel.close)
+        channels = set()
+        for handler in self.handlers:
+            if cancel_consumers:
+                common.ignore_errors(c.connection, handler.consumer.cancel)
+            if handler.consumer.channel:
+                channels.add(handler.consumer.channel)
+        for channel in channels:
+            common.ignore_errors(c.connection, channel.close)
 
     def get_handlers(self, channel):
         return [
