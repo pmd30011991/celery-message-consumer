@@ -167,8 +167,8 @@ class AMQPRetryConsumerStep(bootsteps.StartStopStep):
 
     def start(self, c):
         channel = c.connection.channel()
+        self.pool = c.pool
         self.handlers = self.get_handlers(channel)
-
         for handler in self.handlers:
             handler.declare_queues()
             handler.consumer.consume()
@@ -343,7 +343,8 @@ class AMQPRetryHandler(object):
                     retry_count=retry_count,
                 )
             )
-            self.func(body)
+            self.pool.apply_async(self.func(body))
+            
 
         except Exception as e:
             if isinstance(e, PermanentFailure):
