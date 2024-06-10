@@ -506,7 +506,7 @@ class AMQPRetryHandler(object):
         """
         # First retry after 200 ms, then 1s, then 1m, then every 30m
         # retry_delay = [0.2, 5, 60, 120, 300, 600, 1800]
-        retry_delay = [0.2, 1, 1, 2, 2, 3, 5]
+        retry_delay = [0.2, 1, 3, 30, 300, 600]
         try:
             return retry_delay[retry_count]
         except IndexError:
