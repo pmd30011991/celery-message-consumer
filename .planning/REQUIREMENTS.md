@@ -10,7 +10,7 @@
 - [x] **POOL-01**: Message handler execution dispatched to Celery's eventlet/gevent pool via correct `apply_async(target, args)` signature
 - [x] **POOL-02**: `AMQPRetryHandler` receives pool reference from `AMQPRetryConsumerStep`
 - [x] **POOL-03**: Listener thread returns to `drain_events()` immediately after dispatching — does not block on handler execution
-- [ ] **POOL-04**: Prefork pool detected and falls back to inline execution with warning log
+- [x] **POOL-04**: Prefork pool detected and falls back to inline execution with warning log
 - [x] **POOL-05**: Existing `@message_handler` decorator API unchanged — no breaking changes for library users
 
 ### Acknowledgment Safety
@@ -29,9 +29,9 @@
 
 ### Reconnect
 
-- [ ] **CONN-01**: `_close()` clears `self.handlers = []` to prevent stale handler references after reconnect
-- [ ] **CONN-02**: Channel operations in pool callbacks guarded with error handling for closed connections
-- [ ] **CONN-03**: Celery's existing blueprint restart correctly rebuilds handlers on fresh connection
+- [x] **CONN-01**: `_close()` clears `self.handlers = []` to prevent stale handler references after reconnect
+- [x] **CONN-02**: Channel operations in pool callbacks guarded with error handling for closed connections
+- [x] **CONN-03**: Celery's existing blueprint restart correctly rebuilds handlers on fresh connection
 
 ### Heartbeat
 
@@ -80,7 +80,7 @@
 | POOL-01 | Phase 1 | Complete |
 | POOL-02 | Phase 1 | Complete |
 | POOL-03 | Phase 1 | Complete |
-| POOL-04 | Phase 3 | Pending |
+| POOL-04 | Phase 3 | Complete |
 | POOL-05 | Phase 1 | Complete |
 | ACK-01 | Phase 1 | Complete |
 | ACK-02 | Phase 1 | Complete |
@@ -90,9 +90,9 @@
 | BACK-01 | Phase 2 | Complete |
 | BACK-02 | Phase 2 | Complete |
 | BACK-03 | Phase 2 | Complete |
-| CONN-01 | Phase 3 | Pending |
-| CONN-02 | Phase 3 | Pending |
-| CONN-03 | Phase 3 | Pending |
+| CONN-01 | Phase 3 | Complete |
+| CONN-02 | Phase 3 | Complete |
+| CONN-03 | Phase 3 | Complete |
 | BEAT-01 | Phase 4 | Pending |
 | BEAT-02 | Phase 4 | Pending |
 | TEST-01 | Phase 5 | Pending |

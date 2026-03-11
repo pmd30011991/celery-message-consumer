@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-backpressure-02-01-PLAN.md (pool-derived prefetch_count)
-last_updated: "2026-03-11T09:40:02.550Z"
+stopped_at: Completed 03-reconnect-hardening-03-01-PLAN.md (reconnect hardening)
+last_updated: "2026-03-11T11:10:34.154Z"
 last_activity: 2026-03-11 — 01-01 test scaffold complete
 progress:
   total_phases: 5
-  completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 3
+  total_plans: 4
+  completed_plans: 4
   percent: 50
 ---
 
@@ -53,6 +53,7 @@ Progress: [█████░░░░░] 50%
 | Phase 01-root-cause-fix P01 | 20 | 2 tasks | 3 files |
 | Phase 01-root-cause-fix P02 | 2 | 2 tasks | 2 files |
 | Phase 02-backpressure P01 | 2 | 2 tasks | 3 files |
+| Phase 03-reconnect-hardening P01 | 119 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,9 @@ Recent decisions affecting current work:
 - [Phase 02-backpressure]: PREFETCH_COUNT=0 as sentinel: falsy value enables truthy-chain 'settings.PREFETCH_COUNT or pool_limit or 1' without extra branches
 - [Phase 02-backpressure]: prefetch_count resolved once in start() and passed to AMQPRetryHandler constructor -- not re-derived in __init__, keeps resolution logic in one place
 - [Phase 02-backpressure]: max(effective_prefetch, 1) floor guard in AMQPRetryHandler.__init__() prevents AMQP unlimited (0) from reaching broker
+- [Phase 03-reconnect-hardening]: self.handlers = [] as final statement in _close() — no stale state window between stop() and start()
+- [Phase 03-reconnect-hardening]: bare try/except Exception in pool callbacks (not kombu.ignore_errors) — ignore_errors requires live conn ref unavailable in pool callback scope
+- [Phase 03-reconnect-hardening]: isinstance(pool, AsynPool) with ImportError guard for prefork detection — reliable across Celery versions
 
 ### Pending Todos
 
@@ -86,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-11T09:37:49.493Z
-Stopped at: Completed 02-backpressure-02-01-PLAN.md (pool-derived prefetch_count)
+Last session: 2026-03-11T11:10:34.142Z
+Stopped at: Completed 03-reconnect-hardening-03-01-PLAN.md (reconnect hardening)
 Resume file: None

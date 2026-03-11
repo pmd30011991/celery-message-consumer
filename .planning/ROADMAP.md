@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Root Cause Fix** - Fix `apply_async` call signature and defer ack/retry/archive into pool callbacks (completed 2026-03-11)
 - [x] **Phase 2: Backpressure** - Align `PREFETCH_COUNT` with pool concurrency so broker stops delivery when pool is full (completed 2026-03-11)
-- [ ] **Phase 3: Reconnect Hardening** - Clear stale handlers on close, guard in-flight callbacks, add prefork fallback
+- [x] **Phase 3: Reconnect Hardening** - Clear stale handlers on close, guard in-flight callbacks, add prefork fallback (completed 2026-03-11)
 - [ ] **Phase 4: Heartbeat Safety Net** - Spawn dedicated heartbeat greenlet in `start()` as defense-in-depth
 - [ ] **Phase 5: Validation** - Integration tests confirm thread safety, connection stability, and Celery version compat
 
@@ -56,7 +56,7 @@ Plans:
   2. A pool callback that fires after a reconnect does not raise an unhandled exception when it attempts to ack or retry on the now-closed channel.
   3. Starting the worker with `-P prefork` logs a warning and falls back to inline execution rather than silently misbehaving.
   4. Celery's `blueprint.restart()` correctly rebuilds all handlers on the fresh connection without requiring a full worker restart.
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 03-01-PLAN.md — TDD reconnect hardening: stale handler reset, callback guards, prefork fallback
 
@@ -92,6 +92,6 @@ Note: Phase 2 and Phase 3 are independent of each other (both depend only on Pha
 |-------|----------------|--------|-----------|
 | 1. Root Cause Fix | 2/2 | Complete   | 2026-03-11 |
 | 2. Backpressure | 1/1 | Complete   | 2026-03-11 |
-| 3. Reconnect Hardening | 0/1 | In Progress | - |
+| 3. Reconnect Hardening | 1/1 | Complete   | 2026-03-11 |
 | 4. Heartbeat Safety Net | 0/TBD | Not started | - |
 | 5. Validation | 0/TBD | Not started | - |
