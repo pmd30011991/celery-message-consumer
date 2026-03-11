@@ -32,8 +32,8 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. Existing `@message_handler` decorator and `AMQPRetryConsumerStep` registration interface work without any changes to user code.
 **Plans:** 2/2 plans complete
 Plans:
-- [ ] 01-01-PLAN.md — Test infrastructure and failing tests for all Phase 1 requirements
-- [ ] 01-02-PLAN.md — Fix apply_async dispatch and implement pool callbacks
+- [x] 01-01-PLAN.md — Test infrastructure and failing tests for all Phase 1 requirements
+- [x] 01-02-PLAN.md — Fix apply_async dispatch and implement pool callbacks
 
 ### Phase 2: Backpressure
 **Goal**: RabbitMQ stops delivering new messages once the pool is at capacity, preventing unbounded in-memory message accumulation.
@@ -43,7 +43,9 @@ Plans:
   1. `PREFETCH_COUNT` defaults to pool concurrency (not `1`) and is documented as the intended configuration.
   2. When all pool greenlets are busy, RabbitMQ holds additional messages at the broker — no new messages arrive at the listener until a slot frees up.
   3. Under sustained load equal to pool size, unacknowledged message count in RabbitMQ stays bounded at `PREFETCH_COUNT`; no runaway growth in consumer memory.
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 02-01-PLAN.md — Pool-derived prefetch_count with TDD tests
 
 ### Phase 3: Reconnect Hardening
 **Goal**: A RabbitMQ reconnect produces a clean handler set with no stale references, in-flight callbacks are safe to execute against a closed channel, and prefork pool deployments get a warning and inline fallback.
@@ -87,7 +89,7 @@ Note: Phase 2 and Phase 3 are independent of each other (both depend only on Pha
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Root Cause Fix | 2/2 | Complete   | 2026-03-11 |
-| 2. Backpressure | 0/TBD | Not started | - |
+| 2. Backpressure | 0/1 | Planned | - |
 | 3. Reconnect Hardening | 0/TBD | Not started | - |
 | 4. Heartbeat Safety Net | 0/TBD | Not started | - |
 | 5. Validation | 0/TBD | Not started | - |
