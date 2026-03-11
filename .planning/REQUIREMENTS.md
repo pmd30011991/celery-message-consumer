@@ -7,19 +7,19 @@
 
 ### Pool Dispatch
 
-- [ ] **POOL-01**: Message handler execution dispatched to Celery's eventlet/gevent pool via correct `apply_async(target, args)` signature
-- [ ] **POOL-02**: `AMQPRetryHandler` receives pool reference from `AMQPRetryConsumerStep`
-- [ ] **POOL-03**: Listener thread returns to `drain_events()` immediately after dispatching — does not block on handler execution
+- [x] **POOL-01**: Message handler execution dispatched to Celery's eventlet/gevent pool via correct `apply_async(target, args)` signature
+- [x] **POOL-02**: `AMQPRetryHandler` receives pool reference from `AMQPRetryConsumerStep`
+- [x] **POOL-03**: Listener thread returns to `drain_events()` immediately after dispatching — does not block on handler execution
 - [ ] **POOL-04**: Prefork pool detected and falls back to inline execution with warning log
-- [ ] **POOL-05**: Existing `@message_handler` decorator API unchanged — no breaking changes for library users
+- [x] **POOL-05**: Existing `@message_handler` decorator API unchanged — no breaking changes for library users
 
 ### Acknowledgment Safety
 
-- [ ] **ACK-01**: Messages acked only after successful handler completion in pool (at-least-once delivery)
-- [ ] **ACK-02**: Failed messages trigger retry or archive via pool callbacks — same retry/archive semantics as current behavior
-- [ ] **ACK-03**: Unacknowledged messages requeued on handler crash or connection loss
-- [ ] **ACK-04**: Lambda captures in callbacks use default-argument binding to avoid late-binding bugs
-- [ ] **ACK-05**: `retry_count` captured from message headers before pool dispatch
+- [x] **ACK-01**: Messages acked only after successful handler completion in pool (at-least-once delivery)
+- [x] **ACK-02**: Failed messages trigger retry or archive via pool callbacks — same retry/archive semantics as current behavior
+- [x] **ACK-03**: Unacknowledged messages requeued on handler crash or connection loss
+- [x] **ACK-04**: Lambda captures in callbacks use default-argument binding to avoid late-binding bugs
+- [x] **ACK-05**: `retry_count` captured from message headers before pool dispatch
 
 ### Backpressure
 
@@ -77,16 +77,16 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| POOL-01 | Phase 1 | Pending |
-| POOL-02 | Phase 1 | Pending |
-| POOL-03 | Phase 1 | Pending |
+| POOL-01 | Phase 1 | Complete |
+| POOL-02 | Phase 1 | Complete |
+| POOL-03 | Phase 1 | Complete |
 | POOL-04 | Phase 3 | Pending |
-| POOL-05 | Phase 1 | Pending |
-| ACK-01 | Phase 1 | Pending |
-| ACK-02 | Phase 1 | Pending |
-| ACK-03 | Phase 1 | Pending |
-| ACK-04 | Phase 1 | Pending |
-| ACK-05 | Phase 1 | Pending |
+| POOL-05 | Phase 1 | Complete |
+| ACK-01 | Phase 1 | Complete |
+| ACK-02 | Phase 1 | Complete |
+| ACK-03 | Phase 1 | Complete |
+| ACK-04 | Phase 1 | Complete |
+| ACK-05 | Phase 1 | Complete |
 | BACK-01 | Phase 2 | Pending |
 | BACK-02 | Phase 2 | Pending |
 | BACK-03 | Phase 2 | Pending |

@@ -1,3 +1,19 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: planning
+stopped_at: Completed 01-root-cause-fix-01-01-PLAN.md (test scaffold)
+last_updated: "2026-03-11T09:11:53.921Z"
+last_activity: 2026-03-11 — Roadmap created
+progress:
+  total_phases: 5
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 1
+  percent: 50
+---
+
 # Project State
 
 ## Project Reference
@@ -10,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-03-11)
 ## Current Position
 
 Phase: 1 of 5 (Root Cause Fix)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-03-11 — Roadmap created
+Plan: 1 of 2 in current phase (01-01 complete, 01-02 next)
+Status: In Progress
+Last activity: 2026-03-11 — 01-01 test scaffold complete
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
@@ -34,6 +50,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 01-root-cause-fix P01 | 20 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -45,6 +62,9 @@ Recent decisions affecting current work:
 - [Pre-Phase 1]: Use `callback=` / `error_callback=` pattern on `apply_async` — mirrors Celery's own `strategy.py`; separates ack logic from handler logic.
 - [Pre-Phase 1]: Lambda default-arg capture (`b=body, m=message`) is mandatory — late-binding bugs will silently ack the wrong message.
 - [Pre-Phase 1]: `retry_count` must be captured before `apply_async` dispatch — header is not accessible inside the pool greenlet after dispatch.
+- [Phase 01-root-cause-fix]: autouse settings_patch fixture isolates all tests from real Django settings
+- [Phase 01-root-cause-fix]: mock_pool._all_calls list captures every apply_async invocation for multi-message tests
+- [Phase 01-root-cause-fix]: venv at /tmp/celery-consumer-venv for test runs -- project Pipfile is empty
 
 ### Pending Todos
 
@@ -52,12 +72,12 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 1]: `error_callback` signature may differ between Celery 3.x and 4.x/5.x — verify against installed version before finalizing callback implementation (MEDIUM confidence per research).
+- [Phase 1, RESOLVED]: `error_callback` signature -- Celery 5.x installed. error_callback receives a single exc_info tuple argument (verified in test scaffold).
 - [Phase 4]: Confirm heartbeat greenlet does not double-tick with Celery's own heartbeat machinery — test before enabling by default.
 - [Phase 5]: No test directory present in current checkout — test infrastructure must be created or restored before TEST-01 through TEST-04 can be written.
 
 ## Session Continuity
 
-Last session: 2026-03-11
-Stopped at: Roadmap written. REQUIREMENTS.md traceability table already populated. Ready for `plan-phase 1`.
+Last session: 2026-03-11T09:11:53.919Z
+Stopped at: Completed 01-root-cause-fix-01-01-PLAN.md (test scaffold)
 Resume file: None
