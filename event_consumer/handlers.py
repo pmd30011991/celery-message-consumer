@@ -201,6 +201,7 @@ class AMQPRetryConsumerStep(bootsteps.StartStopStep):
                 queue_arguments=handler_registration.queue_arguments,
                 func=handler_registration.handler,
                 backoff_func=settings.BACKOFF_FUNC,
+                pool=self.pool,  # NEW: wire pool for async dispatch
             )
             for queue_key, handler_registration in self._tasks.items()
         ]
@@ -223,7 +224,8 @@ class AMQPRetryHandler(object):
                  exchange,  # type: str
                  queue_arguments,  # type: Dict[str, str]
                  func,  # type: Callable[[Any], Any]
-                 backoff_func=None  # type: Optional[Callable[[int], float]]
+                 backoff_func=None,  # type: Optional[Callable[[int], float]]
+                 pool=None,         # NEW: pool reference for async dispatch
                  ):
         # type: (...) -> None
         self.channel = channel
@@ -232,6 +234,7 @@ class AMQPRetryHandler(object):
         self.exchange = exchange  # `settings.EXCHANGES` config key
         self.func = func
         self.backoff_func = backoff_func or self.backoff
+        self.pool = pool
 
         self.exchanges = {
             DEFAULT_EXCHANGE: kombu.Exchange(channel=self.channel)
@@ -318,6 +321,146 @@ class AMQPRetryHandler(object):
                  func=self.func,
             )
         )
+
+    def _django_cleanup(self):
+        """Send Django request_finished signal if USE_DJANGO is enabled."""
+        if settings.USE_DJANGO:
+            request_finished.send(sender="AMQPRetryHandler")
+
+    def _on_pool_success(self, body, message):
+        """Called by pool after successful handler execution. Acks the message."""
+        try:
+            message.ack()
+            _logger.debug(
+                "Task '%s' processed and ack() sent", self.routing_key
+            )
+        except Exception:
+            _logger.warning(
+                "Could not ack message for '%s'", self.routing_key, exc_info=True
+            )
+        finally:
+            self._django_cleanup()
+
+    def _on_pool_error(self, body, message, exc_info, retry_count):
+        """Called by pool after handler raises an exception. Routes to retry or archive."""
+        # Defensive unpack: Celery 4.x/5.x passes tuple, 3.x may differ
+        if isinstance(exc_info, tuple) and len(exc_info) == 3:
+            exc_type, exc_value, tb = exc_info
+        else:
+            exc_type = type(exc_info)
+            exc_value = exc_info
+            tb = None
+
+        try:
+            if isinstance(exc_value, PermanentFailure):
+                self.archive(
+                    body,
+                    message,
+                    "Task '{routing_key}' raised '{cls}, {error}'\n"
+                    "{tb}".format(
+                        routing_key=self.routing_key,
+                        cls=exc_type.__name__,
+                        error=exc_value,
+                        tb=traceback.format_tb(tb) if tb else '',
+                    )
+                )
+            elif retry_count >= settings.MAX_RETRIES:
+                self.archive(
+                    body,
+                    message,
+                    "Task '{routing_key}' ran out of retries ({retries}) on exception "
+                    "'{cls}, {error}'\n"
+                    "{tb}".format(
+                        routing_key=self.routing_key,
+                        retries=retry_count,
+                        cls=exc_type.__name__,
+                        error=exc_value,
+                        tb=traceback.format_tb(tb) if tb else '',
+                    )
+                )
+            else:
+                self.retry(
+                    body,
+                    message,
+                    "Task '{routing_key}' raised the exception '{cls}, {error}', but there are "
+                    "{retries} retries left\n"
+                    "{tb}".format(
+                        routing_key=self.routing_key,
+                        retries=settings.MAX_RETRIES - retry_count,
+                        cls=exc_type.__name__,
+                        error=exc_value,
+                        tb=traceback.format_tb(tb) if tb else '',
+                    )
+                )
+        finally:
+            self._django_cleanup()
+            if not message.acknowledged:
+                message.requeue()
+                _logger.critical(
+                    "Message for task '%s' unacknowledged after error callback - requeueing.",
+                    self.routing_key,
+                )
+
+    def _inline_dispatch(self, body, message, retry_count):
+        """Execute handler inline when pool is unavailable (pool=None fallback)."""
+        try:
+            self.func(body)
+        except Exception as e:
+            if isinstance(e, PermanentFailure):
+                self.archive(
+                    body,
+                    message,
+                    "Task '{routing_key}' raised '{cls}, {error}'\n"
+                    "{traceback_}".format(
+                        routing_key=self.routing_key,
+                        cls=e.__class__.__name__,
+                        error=e,
+                        traceback_=traceback.format_exc(),
+                    )
+                )
+            elif retry_count >= settings.MAX_RETRIES:
+                self.archive(
+                    body,
+                    message,
+                    "Task '{routing_key}' ran out of retries ({retries}) on exception "
+                    "'{cls}, {error}'\n"
+                    "{traceback_}".format(
+                        routing_key=self.routing_key,
+                        retries=retry_count,
+                        cls=e.__class__.__name__,
+                        error=e,
+                        traceback_=traceback.format_exc(),
+                    )
+                )
+            else:
+                self.retry(
+                    body,
+                    message,
+                    "Task '{routing_key}' raised the exception '{cls}, {error}', but there are "
+                    "{retries} retries left\n"
+                    "{traceback_}".format(
+                        routing_key=self.routing_key,
+                        retries=settings.MAX_RETRIES - retry_count,
+                        cls=e.__class__.__name__,
+                        error=e,
+                        traceback_=traceback.format_exc(),
+                    )
+                )
+        else:
+            message.ack()
+            _logger.debug(
+                "Task '%s' processed and ack() sent", self.routing_key
+            )
+        finally:
+            self._django_cleanup()
+            if not message.acknowledged:
+                message.requeue()
+                _logger.critical(
+                    "Messages for task '%s' are not sending an ack() or a reject(). "
+                    "This needs attention. Assuming some kind of error and requeueing the "
+                    "message.",
+                    self.routing_key,
+                )
 
     def __call__(self, body, message):
         """
