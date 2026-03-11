@@ -12,7 +12,7 @@ The library has a single root-cause bug: `apply_async(self.func(body))` executes
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Root Cause Fix** - Fix `apply_async` call signature and defer ack/retry/archive into pool callbacks
+- [x] **Phase 1: Root Cause Fix** - Fix `apply_async` call signature and defer ack/retry/archive into pool callbacks (completed 2026-03-11)
 - [ ] **Phase 2: Backpressure** - Align `PREFETCH_COUNT` with pool concurrency so broker stops delivery when pool is full
 - [ ] **Phase 3: Reconnect Hardening** - Clear stale handlers on close, guard in-flight callbacks, add prefork fallback
 - [ ] **Phase 4: Heartbeat Safety Net** - Spawn dedicated heartbeat greenlet in `start()` as defense-in-depth
@@ -30,7 +30,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A handler that raises `PermanentFailure` causes the message to be archived via `_on_pool_error` callback, not inline code.
   4. A handler that raises a transient exception causes the message to be retried (or archived when retries exhausted) via the error callback — same retry/archive semantics as the current inline path.
   5. Existing `@message_handler` decorator and `AMQPRetryConsumerStep` registration interface work without any changes to user code.
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 01-01-PLAN.md — Test infrastructure and failing tests for all Phase 1 requirements
 - [ ] 01-02-PLAN.md — Fix apply_async dispatch and implement pool callbacks
@@ -86,7 +86,7 @@ Note: Phase 2 and Phase 3 are independent of each other (both depend only on Pha
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Root Cause Fix | 1/2 | In Progress|  |
+| 1. Root Cause Fix | 2/2 | Complete   | 2026-03-11 |
 | 2. Backpressure | 0/TBD | Not started | - |
 | 3. Reconnect Hardening | 0/TBD | Not started | - |
 | 4. Heartbeat Safety Net | 0/TBD | Not started | - |

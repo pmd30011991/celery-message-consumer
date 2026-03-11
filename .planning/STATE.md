@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Completed 01-root-cause-fix-01-01-PLAN.md (test scaffold)
-last_updated: "2026-03-11T09:11:53.921Z"
-last_activity: 2026-03-11 — Roadmap created
+status: executing
+stopped_at: Completed 01-root-cause-fix-01-02-PLAN.md (pool dispatch fix)
+last_updated: "2026-03-11T09:16:26.443Z"
+last_activity: 2026-03-11 — 01-01 test scaffold complete
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 50
 ---
 
@@ -51,6 +51,7 @@ Progress: [█████░░░░░] 50%
 
 *Updated after each plan completion*
 | Phase 01-root-cause-fix P01 | 20 | 2 tasks | 3 files |
+| Phase 01-root-cause-fix P02 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,9 @@ Recent decisions affecting current work:
 - [Phase 01-root-cause-fix]: autouse settings_patch fixture isolates all tests from real Django settings
 - [Phase 01-root-cause-fix]: mock_pool._all_calls list captures every apply_async invocation for multi-message tests
 - [Phase 01-root-cause-fix]: venv at /tmp/celery-consumer-venv for test runs -- project Pipfile is empty
+- [Phase 01-root-cause-fix]: apply_async dispatches callable via target=/args= kwargs, not return value -- fixes root-cause bug POOL-01
+- [Phase 01-root-cause-fix]: Lambda default-arg capture (b=body, m=message, rc=retry_count) mandatory for correct per-message ack -- late-binding would silently ack wrong message
+- [Phase 01-root-cause-fix]: retry_count read from message.headers before apply_async dispatch -- not accessible inside pool greenlet after dispatch
 
 ### Pending Todos
 
@@ -78,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-11T09:11:53.919Z
-Stopped at: Completed 01-root-cause-fix-01-01-PLAN.md (test scaffold)
+Last session: 2026-03-11T09:16:26.441Z
+Stopped at: Completed 01-root-cause-fix-01-02-PLAN.md (pool dispatch fix)
 Resume file: None
