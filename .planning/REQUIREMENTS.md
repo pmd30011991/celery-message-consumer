@@ -23,9 +23,9 @@
 
 ### Backpressure
 
-- [ ] **BACK-01**: `PREFETCH_COUNT` configurable and aligned with pool concurrency
-- [ ] **BACK-02**: RabbitMQ stops delivering messages when all prefetch slots occupied
-- [ ] **BACK-03**: Consumer does not accumulate unbounded in-memory messages during pool saturation
+- [x] **BACK-01**: `PREFETCH_COUNT` configurable and aligned with pool concurrency
+- [x] **BACK-02**: RabbitMQ stops delivering messages when all prefetch slots occupied
+- [x] **BACK-03**: Consumer does not accumulate unbounded in-memory messages during pool saturation
 
 ### Reconnect
 
@@ -87,9 +87,9 @@
 | ACK-03 | Phase 1 | Complete |
 | ACK-04 | Phase 1 | Complete |
 | ACK-05 | Phase 1 | Complete |
-| BACK-01 | Phase 2 | Pending |
-| BACK-02 | Phase 2 | Pending |
-| BACK-03 | Phase 2 | Pending |
+| BACK-01 | Phase 2 | Complete |
+| BACK-02 | Phase 2 | Complete |
+| BACK-03 | Phase 2 | Complete |
 | CONN-01 | Phase 3 | Pending |
 | CONN-02 | Phase 3 | Pending |
 | CONN-03 | Phase 3 | Pending |

@@ -13,7 +13,7 @@ The library has a single root-cause bug: `apply_async(self.func(body))` executes
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Root Cause Fix** - Fix `apply_async` call signature and defer ack/retry/archive into pool callbacks (completed 2026-03-11)
-- [ ] **Phase 2: Backpressure** - Align `PREFETCH_COUNT` with pool concurrency so broker stops delivery when pool is full
+- [x] **Phase 2: Backpressure** - Align `PREFETCH_COUNT` with pool concurrency so broker stops delivery when pool is full (completed 2026-03-11)
 - [ ] **Phase 3: Reconnect Hardening** - Clear stale handlers on close, guard in-flight callbacks, add prefork fallback
 - [ ] **Phase 4: Heartbeat Safety Net** - Spawn dedicated heartbeat greenlet in `start()` as defense-in-depth
 - [ ] **Phase 5: Validation** - Integration tests confirm thread safety, connection stability, and Celery version compat
@@ -43,7 +43,7 @@ Plans:
   1. `PREFETCH_COUNT` defaults to pool concurrency (not `1`) and is documented as the intended configuration.
   2. When all pool greenlets are busy, RabbitMQ holds additional messages at the broker — no new messages arrive at the listener until a slot frees up.
   3. Under sustained load equal to pool size, unacknowledged message count in RabbitMQ stays bounded at `PREFETCH_COUNT`; no runaway growth in consumer memory.
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 02-01-PLAN.md — Pool-derived prefetch_count with TDD tests
 
@@ -89,7 +89,7 @@ Note: Phase 2 and Phase 3 are independent of each other (both depend only on Pha
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Root Cause Fix | 2/2 | Complete   | 2026-03-11 |
-| 2. Backpressure | 0/1 | Planned | - |
+| 2. Backpressure | 1/1 | Complete   | 2026-03-11 |
 | 3. Reconnect Hardening | 0/TBD | Not started | - |
 | 4. Heartbeat Safety Net | 0/TBD | Not started | - |
 | 5. Validation | 0/TBD | Not started | - |
