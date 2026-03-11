@@ -19,8 +19,8 @@ QUEUE_NAME_PREFIX = ''
 BACKOFF_FUNC = get('BACKOFF_FUNC', None)  # type: Optional[Callable[[int], float]]
 
 RETRY_HEADER = 'x-retry-count'
-# Set the consumer prefetch limit
-PREFETCH_COUNT = 1
+# 0 = derive from pool concurrency at runtime; set EVENT_CONSUMER_PREFETCH_COUNT to override
+PREFETCH_COUNT = get('PREFETCH_COUNT', 0)
 # to set TTL for archived message (milliseconds)
 ARCHIVE_EXPIRY = get('ARCHIVE_EXPIRY', int(timedelta(days=24).total_seconds() * 1000))  # type: int
 # max size of archive queue before dropping messages

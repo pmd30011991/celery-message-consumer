@@ -168,6 +168,13 @@ class AMQPRetryConsumerStep(bootsteps.StartStopStep):
     def start(self, c):
         channel = c.connection.channel()
         self.pool = c.pool
+        pool_limit = getattr(self.pool, 'limit', None)
+        # Explicit setting wins; fall back to pool concurrency; final fallback = 1
+        self.prefetch_count = settings.PREFETCH_COUNT or pool_limit or 1
+        _logger.info(
+            'AMQPRetryConsumerStep: prefetch_count=%d (pool_limit=%s, setting=%s)',
+            self.prefetch_count, pool_limit, settings.PREFETCH_COUNT,
+        )
         self.handlers = self.get_handlers(channel)
         for handler in self.handlers:
             handler.declare_queues()
@@ -201,7 +208,8 @@ class AMQPRetryConsumerStep(bootsteps.StartStopStep):
                 queue_arguments=handler_registration.queue_arguments,
                 func=handler_registration.handler,
                 backoff_func=settings.BACKOFF_FUNC,
-                pool=self.pool,  # NEW: wire pool for async dispatch
+                pool=self.pool,  # wire pool for async dispatch
+                prefetch_count=self.prefetch_count,  # pool-derived backpressure limit
             )
             for queue_key, handler_registration in self._tasks.items()
         ]
@@ -224,8 +232,9 @@ class AMQPRetryHandler(object):
                  exchange,  # type: str
                  queue_arguments,  # type: Dict[str, str]
                  func,  # type: Callable[[Any], Any]
-                 backoff_func=None,  # type: Optional[Callable[[int], float]]
-                 pool=None,         # NEW: pool reference for async dispatch
+                 backoff_func=None,   # type: Optional[Callable[[int], float]]
+                 pool=None,           # pool reference for async dispatch
+                 prefetch_count=None, # pool-derived backpressure limit (None = use settings)
                  ):
         # type: (...) -> None
         self.channel = channel
@@ -305,7 +314,9 @@ class AMQPRetryHandler(object):
             accept=settings.ACCEPT,
         )
 
-        self.consumer.qos(prefetch_count=settings.PREFETCH_COUNT)
+        effective_prefetch = prefetch_count if prefetch_count is not None else settings.PREFETCH_COUNT
+        # Never pass 0 to consumer.qos() -- AMQP treats 0 as "unlimited" (no backpressure)
+        self.consumer.qos(prefetch_count=max(effective_prefetch, 1))
 
     def __repr__(self):
         return (
