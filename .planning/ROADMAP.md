@@ -30,7 +30,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A handler that raises `PermanentFailure` causes the message to be archived via `_on_pool_error` callback, not inline code.
   4. A handler that raises a transient exception causes the message to be retried (or archived when retries exhausted) via the error callback — same retry/archive semantics as the current inline path.
   5. Existing `@message_handler` decorator and `AMQPRetryConsumerStep` registration interface work without any changes to user code.
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 01-01-PLAN.md — Test infrastructure and failing tests for all Phase 1 requirements
+- [ ] 01-02-PLAN.md — Fix apply_async dispatch and implement pool callbacks
 
 ### Phase 2: Backpressure
 **Goal**: RabbitMQ stops delivering new messages once the pool is at capacity, preventing unbounded in-memory message accumulation.
@@ -83,7 +86,7 @@ Note: Phase 2 and Phase 3 are independent of each other (both depend only on Pha
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Root Cause Fix | 0/TBD | Not started | - |
+| 1. Root Cause Fix | 0/2 | Planning complete | - |
 | 2. Backpressure | 0/TBD | Not started | - |
 | 3. Reconnect Hardening | 0/TBD | Not started | - |
 | 4. Heartbeat Safety Net | 0/TBD | Not started | - |
