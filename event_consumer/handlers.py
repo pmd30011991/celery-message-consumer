@@ -477,78 +477,39 @@ class AMQPRetryHandler(object):
         Returns:
             None
         """
-        retry_count = self.retry_count(message)
+        retry_count = self.retry_count(message)  # ACK-05: capture BEFORE dispatch
+
+        _logger.debug(
+            'Received: (key=%s, retry_count=%s)',
+            self.routing_key,
+            retry_count,
+        )
+
+        if self.pool is None:
+            # Inline fallback when pool is not available
+            self._inline_dispatch(body, message, retry_count)
+            return
 
         try:
-            _logger.debug(
-                'Received: (key={routing_key}, retry_count={retry_count})'.format(
-                    routing_key=self.routing_key,
-                    retry_count=retry_count,
-                )
+            self.pool.apply_async(
+                target=self.func,                                          # POOL-01: pass callable, not return value
+                args=(body,),
+                callback=lambda result, b=body, m=message: (               # ACK-04: default-arg capture
+                    self._on_pool_success(b, m)
+                ),
+                error_callback=lambda exc_info, b=body, m=message, rc=retry_count: (  # ACK-04 + ACK-05
+                    self._on_pool_error(b, m, exc_info, rc)
+                ),
             )
-            self.pool.apply_async(self.func(body))
-            
-
-        except Exception as e:
-            if isinstance(e, PermanentFailure):
-                self.archive(
-                    body,
-                    message,
-                    "Task '{routing_key}' raised '{cls}, {error}'\n"
-                    "{traceback}".format(
-                        routing_key=self.routing_key,
-                        cls=e.__class__.__name__,
-                        error=e,
-                        traceback=traceback.format_exc(),
-                    )
-                )
-            elif retry_count >= settings.MAX_RETRIES:
-                self.archive(
-                    body,
-                    message,
-                    "Task '{routing_key}' ran out of retries ({retries}) on exception "
-                    "'{cls}, {error}'\n"
-                    "{traceback}".format(
-                        routing_key=self.routing_key,
-                        retries=retry_count,
-                        cls=e.__class__.__name__,
-                        error=e,
-                        traceback=traceback.format_exc(),
-                    )
-                )
-            else:
-                self.retry(
-                    body,
-                    message,
-                    "Task '{routing_key}' raised the exception '{cls}, {error}', but there are "
-                    "{retries} retries left\n"
-                    "{traceback}".format(
-                        routing_key=self.routing_key,
-                        retries=settings.MAX_RETRIES - retry_count,
-                        cls=e.__class__.__name__,
-                        error=e,
-                        traceback=traceback.format_exc(),
-                    )
-                )
-        else:
-            message.ack()
-            _logger.debug(
-                "Task '{routing_key}' processed and ack() sent".format(routing_key=self.routing_key)
+            # POOL-03: Listener thread returns here immediately
+        except Exception:
+            _logger.error(
+                "Failed to dispatch task '%s' to pool",
+                self.routing_key,
+                exc_info=True,
             )
-
-        finally:
-            if settings.USE_DJANGO:
-                # avoid various problems with db connections, due to long-lived
-                # worker not automatically participating in Django request lifecycle
-                request_finished.send(sender="AMQPRetryHandler")
-
-            if not message.acknowledged:
-                message.requeue()
-                _logger.critical(
-                    "Messages for task '{routing_key}' are not sending an ack() or a reject(). "
-                    "This needs attention. Assuming some kind of error and requeueing the "
-                    "message.".format(routing_key=self.routing_key)
-                )
+            # If pool dispatch itself fails, fall back to inline
+            self._inline_dispatch(body, message, retry_count)
 
     def retry(self, body, message, reason=''):
         """

@@ -73,7 +73,8 @@ def test_handler_receives_pool_from_get_handlers():
         )
     }
 
-    step = AMQPRetryConsumerStep(tasks=registry)
+    mock_parent = MagicMock(name='parent')
+    step = AMQPRetryConsumerStep(mock_parent, tasks=registry)
 
     # Build a fake consumer 'c' with pool and connection
     mock_worker_pool = MagicMock(name='worker_pool')
