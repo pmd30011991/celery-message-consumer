@@ -169,6 +169,22 @@ class AMQPRetryConsumerStep(bootsteps.StartStopStep):
         channel = c.connection.channel()
         self.pool = c.pool
         pool_limit = getattr(self.pool, 'limit', None)
+
+        # POOL-04: Prefork pool (AsynPool) does not support cross-thread dispatch.
+        # Detect and fall back to inline execution with a warning.
+        try:
+            from celery.concurrency.asynpool import AsynPool
+            if isinstance(self.pool, AsynPool):
+                _logger.warning(
+                    "AMQPRetryConsumerStep: Prefork pool detected (-P prefork). "
+                    "Falling back to inline dispatch. "
+                    "Use -P eventlet or -P gevent for true async dispatch."
+                )
+                self.pool = None
+                pool_limit = None
+        except ImportError:
+            pass  # asynpool not available in this Celery build
+
         # Explicit setting wins; fall back to pool concurrency; final fallback = 1
         self.prefetch_count = settings.PREFETCH_COUNT or pool_limit or 1
         _logger.info(
@@ -197,6 +213,7 @@ class AMQPRetryConsumerStep(bootsteps.StartStopStep):
                 channels.add(handler.consumer.channel)
         for channel in channels:
             common.ignore_errors(c.connection, channel.close)
+        self.handlers = []  # CONN-01: clear stale references after every close
 
     def get_handlers(self, channel):
         return [
@@ -347,7 +364,8 @@ class AMQPRetryHandler(object):
             )
         except Exception:
             _logger.warning(
-                "Could not ack message for '%s'", self.routing_key, exc_info=True
+                "Could not ack message for '%s' (channel likely closed by reconnect)",
+                self.routing_key, exc_info=True
             )
         finally:
             self._django_cleanup()
@@ -406,11 +424,18 @@ class AMQPRetryHandler(object):
         finally:
             self._django_cleanup()
             if not message.acknowledged:
-                message.requeue()
-                _logger.critical(
-                    "Message for task '%s' unacknowledged after error callback - requeueing.",
-                    self.routing_key,
-                )
+                try:
+                    message.requeue()
+                except Exception:
+                    _logger.warning(
+                        "Could not requeue message for '%s' (channel likely closed by reconnect)",
+                        self.routing_key, exc_info=True
+                    )
+                else:
+                    _logger.critical(
+                        "Message for task '%s' unacknowledged after error callback - requeueing.",
+                        self.routing_key,
+                    )
 
     def _inline_dispatch(self, body, message, retry_count):
         """Execute handler inline when pool is unavailable (pool=None fallback)."""
