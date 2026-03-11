@@ -68,7 +68,9 @@ Plans:
   1. With a heartbeat interval configured on the connection, a dedicated greenlet calls `connection.heartbeat_tick()` on the correct interval without interfering with the listener's own heartbeat calls.
   2. Under a sustained burst where the listener thread is continuously dispatching messages, the RabbitMQ connection does not drop due to a missed heartbeat.
   3. The heartbeat greenlet is only spawned when `c.connection.heartbeat` is set (non-zero); no greenlet is created for connections without a heartbeat configured.
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 04-01-PLAN.md — TDD heartbeat safety-net greenlet (spawn, guard, kill lifecycle)
 
 ### Phase 5: Validation
 **Goal**: Integration and unit tests confirm correct pool dispatch behavior, connection stability, and callback correctness across supported Celery versions — regressions are caught before they ship.
@@ -93,5 +95,5 @@ Note: Phase 2 and Phase 3 are independent of each other (both depend only on Pha
 | 1. Root Cause Fix | 2/2 | Complete   | 2026-03-11 |
 | 2. Backpressure | 1/1 | Complete   | 2026-03-11 |
 | 3. Reconnect Hardening | 1/1 | Complete   | 2026-03-11 |
-| 4. Heartbeat Safety Net | 0/TBD | Not started | - |
+| 4. Heartbeat Safety Net | 0/1 | Planning complete | - |
 | 5. Validation | 0/TBD | Not started | - |
