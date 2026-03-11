@@ -45,7 +45,7 @@ Plans:
   3. Under sustained load equal to pool size, unacknowledged message count in RabbitMQ stays bounded at `PREFETCH_COUNT`; no runaway growth in consumer memory.
 **Plans:** 1/1 plans complete
 Plans:
-- [ ] 02-01-PLAN.md — Pool-derived prefetch_count with TDD tests
+- [x] 02-01-PLAN.md — Pool-derived prefetch_count with TDD tests
 
 ### Phase 3: Reconnect Hardening
 **Goal**: A RabbitMQ reconnect produces a clean handler set with no stale references, in-flight callbacks are safe to execute against a closed channel, and prefork pool deployments get a warning and inline fallback.
@@ -56,7 +56,9 @@ Plans:
   2. A pool callback that fires after a reconnect does not raise an unhandled exception when it attempts to ack or retry on the now-closed channel.
   3. Starting the worker with `-P prefork` logs a warning and falls back to inline execution rather than silently misbehaving.
   4. Celery's `blueprint.restart()` correctly rebuilds all handlers on the fresh connection without requiring a full worker restart.
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 03-01-PLAN.md — TDD reconnect hardening: stale handler reset, callback guards, prefork fallback
 
 ### Phase 4: Heartbeat Safety Net
 **Goal**: AMQP heartbeats are maintained even during sustained periods of high pool dispatch load, through a dedicated heartbeat greenlet independent of the listener loop.
@@ -90,6 +92,6 @@ Note: Phase 2 and Phase 3 are independent of each other (both depend only on Pha
 |-------|----------------|--------|-----------|
 | 1. Root Cause Fix | 2/2 | Complete   | 2026-03-11 |
 | 2. Backpressure | 1/1 | Complete   | 2026-03-11 |
-| 3. Reconnect Hardening | 0/TBD | Not started | - |
+| 3. Reconnect Hardening | 0/1 | In Progress | - |
 | 4. Heartbeat Safety Net | 0/TBD | Not started | - |
 | 5. Validation | 0/TBD | Not started | - |
