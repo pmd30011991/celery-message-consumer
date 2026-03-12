@@ -29,9 +29,41 @@ if settings.USE_DJANGO:
 
 _logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Concurrency primitives: eventlet preferred, fall back to gevent, else None.
+# _spawn and _sleep are module-level so tests can patch them independently.
+# ---------------------------------------------------------------------------
+try:
+    import eventlet
+    _spawn = eventlet.spawn
+    _sleep = eventlet.sleep
+except ImportError:
+    try:
+        import gevent
+        _spawn = gevent.spawn
+        _sleep = gevent.sleep
+    except ImportError:
+        _spawn = None  # type: ignore[assignment]
+        _sleep = None  # type: ignore[assignment]
+
 
 # Maps routing-keys to handlers
 REGISTRY = {}  # type: Dict[QueueKey, HandlerRegistration]
+
+
+def _heartbeat_loop(connection, interval):
+    """Safety-net greenlet: sends AMQP heartbeat frames at interval/2 cadence.
+
+    Runs as a dedicated greenlet so heartbeats are maintained even when the
+    listener thread is busy dispatching messages.
+
+    Args:
+        connection: amqp.Connection — the broker connection.
+        interval: int — heartbeat interval in seconds (as configured on the connection).
+    """
+    while True:
+        _sleep(interval / 2)
+        connection.heartbeat_tick()
 
 DEFAULT_EXCHANGE = 'default'
 
@@ -162,6 +194,7 @@ class AMQPRetryConsumerStep(bootsteps.StartStopStep):
 
     def __init__(self, *args, **kwargs):
         self.handlers = []  # type: List[AMQPRetryHandler]
+        self._heartbeat_greenlet = None
         self._tasks = kwargs.pop('tasks', REGISTRY)  # type: Dict[QueueKey, HandlerRegistration]
         super(AMQPRetryConsumerStep, self).__init__(*args, **kwargs)
 
@@ -197,6 +230,17 @@ class AMQPRetryConsumerStep(bootsteps.StartStopStep):
             handler.consumer.consume()
             _logger.debug('AMQPRetryConsumerStep: Started handler: %s', handler)
 
+        # BEAT-01: Spawn dedicated heartbeat greenlet when heartbeat is configured.
+        # This ensures heartbeat frames are sent even when the listener thread is
+        # saturated with message dispatches (defense-in-depth).
+        if c.connection.heartbeat and _spawn is not None:
+            self._heartbeat_greenlet = _spawn(_heartbeat_loop, c.connection, c.connection.heartbeat)
+            _logger.info(
+                'AMQPRetryConsumerStep: heartbeat greenlet started (interval=%ds, tick_interval=%ds)',
+                c.connection.heartbeat,
+                c.connection.heartbeat / 2,
+            )
+
     def stop(self, c):
         self._close(c, True)
 
@@ -204,7 +248,12 @@ class AMQPRetryConsumerStep(bootsteps.StartStopStep):
         self._close(c, False)
 
     def _close(self, c, cancel_consumers=True):
-        _logger.debug('Close Consumer');
+        _logger.debug('Close Consumer')
+        # BEAT-02: Kill heartbeat greenlet before channel teardown to prevent
+        # leaked greenlets after reconnect.
+        if getattr(self, '_heartbeat_greenlet', None) is not None:
+            self._heartbeat_greenlet.kill()
+            self._heartbeat_greenlet = None
         channels = set()
         for handler in self.handlers:
             if cancel_consumers:

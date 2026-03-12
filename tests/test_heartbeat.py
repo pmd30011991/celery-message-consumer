@@ -213,14 +213,16 @@ class TestHeartbeatLoopBehavior:
 
         def mock_sleep(seconds):
             sleep_calls.append(seconds)
-            if len(sleep_calls) >= 1:
+            if len(sleep_calls) >= 2:
+                # Stop after the second sleep call (i.e., after one full iteration
+                # of: sleep -> tick -> sleep -> STOP)
                 raise _StopLoop()
 
         with patch('event_consumer.handlers._sleep', side_effect=mock_sleep):
             try:
                 _heartbeat_loop(mock_connection, interval)
             except _StopLoop:
-                pass  # Expected: loop terminated after first iteration
+                pass  # Expected: loop terminated after first full iteration
 
         # Sleep must have been called with interval/2
         assert len(sleep_calls) >= 1, "_sleep must be called at least once"
