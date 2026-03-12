@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Root Cause Fix** - Fix `apply_async` call signature and defer ack/retry/archive into pool callbacks (completed 2026-03-11)
 - [x] **Phase 2: Backpressure** - Align `PREFETCH_COUNT` with pool concurrency so broker stops delivery when pool is full (completed 2026-03-11)
 - [x] **Phase 3: Reconnect Hardening** - Clear stale handlers on close, guard in-flight callbacks, add prefork fallback (completed 2026-03-11)
-- [ ] **Phase 4: Heartbeat Safety Net** - Spawn dedicated heartbeat greenlet in `start()` as defense-in-depth
+- [x] **Phase 4: Heartbeat Safety Net** - Spawn dedicated heartbeat greenlet in `start()` as defense-in-depth (completed 2026-03-12)
 - [ ] **Phase 5: Validation** - Integration tests confirm thread safety, connection stability, and Celery version compat
 
 ## Phase Details
@@ -68,7 +68,7 @@ Plans:
   1. With a heartbeat interval configured on the connection, a dedicated greenlet calls `connection.heartbeat_tick()` on the correct interval without interfering with the listener's own heartbeat calls.
   2. Under a sustained burst where the listener thread is continuously dispatching messages, the RabbitMQ connection does not drop due to a missed heartbeat.
   3. The heartbeat greenlet is only spawned when `c.connection.heartbeat` is set (non-zero); no greenlet is created for connections without a heartbeat configured.
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 04-01-PLAN.md — TDD heartbeat safety-net greenlet (spawn, guard, kill lifecycle)
 
@@ -95,5 +95,5 @@ Note: Phase 2 and Phase 3 are independent of each other (both depend only on Pha
 | 1. Root Cause Fix | 2/2 | Complete   | 2026-03-11 |
 | 2. Backpressure | 1/1 | Complete   | 2026-03-11 |
 | 3. Reconnect Hardening | 1/1 | Complete   | 2026-03-11 |
-| 4. Heartbeat Safety Net | 0/1 | Planning complete | - |
+| 4. Heartbeat Safety Net | 1/1 | Complete   | 2026-03-12 |
 | 5. Validation | 0/TBD | Not started | - |

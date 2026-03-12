@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-reconnect-hardening-03-01-PLAN.md (reconnect hardening)
-last_updated: "2026-03-11T11:13:10.906Z"
+stopped_at: Completed 04-heartbeat-safety-net-04-01-PLAN.md (heartbeat safety-net greenlet)
+last_updated: "2026-03-12T09:16:08.646Z"
 last_activity: 2026-03-11 — 01-01 test scaffold complete
 progress:
   total_phases: 5
-  completed_phases: 3
-  total_plans: 4
-  completed_plans: 4
+  completed_phases: 4
+  total_plans: 5
+  completed_plans: 5
   percent: 50
 ---
 
@@ -54,6 +54,7 @@ Progress: [█████░░░░░] 50%
 | Phase 01-root-cause-fix P02 | 2 | 2 tasks | 2 files |
 | Phase 02-backpressure P01 | 2 | 2 tasks | 3 files |
 | Phase 03-reconnect-hardening P01 | 119 | 2 tasks | 2 files |
+| Phase 04-heartbeat-safety-net P01 | 4 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,9 @@ Recent decisions affecting current work:
 - [Phase 03-reconnect-hardening]: self.handlers = [] as final statement in _close() — no stale state window between stop() and start()
 - [Phase 03-reconnect-hardening]: bare try/except Exception in pool callbacks (not kombu.ignore_errors) — ignore_errors requires live conn ref unavailable in pool callback scope
 - [Phase 03-reconnect-hardening]: isinstance(pool, AsynPool) with ImportError guard for prefork detection — reliable across Celery versions
+- [Phase 04-heartbeat-safety-net]: _spawn/_sleep module-level: testable without monkeypatching entire libraries
+- [Phase 04-heartbeat-safety-net]: eventlet->gevent->None fallback order matches existing Celery pool preference; _spawn=None skips greenlet creation safely
+- [Phase 04-heartbeat-safety-net]: _heartbeat_loop is module-level function (no self reference) — pure inputs: connection + interval
 
 ### Pending Todos
 
@@ -90,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-11T11:10:34.142Z
-Stopped at: Completed 03-reconnect-hardening-03-01-PLAN.md (reconnect hardening)
+Last session: 2026-03-12T09:16:08.643Z
+Stopped at: Completed 04-heartbeat-safety-net-04-01-PLAN.md (heartbeat safety-net greenlet)
 Resume file: None

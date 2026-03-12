@@ -35,8 +35,8 @@
 
 ### Heartbeat
 
-- [ ] **BEAT-01**: AMQP heartbeats maintained during long-running handler execution
-- [ ] **BEAT-02**: Dedicated heartbeat greenlet spawned in `start()` as safety net (conditional on connection heartbeat being set)
+- [x] **BEAT-01**: AMQP heartbeats maintained during long-running handler execution
+- [x] **BEAT-02**: Dedicated heartbeat greenlet spawned in `start()` as safety net (conditional on connection heartbeat being set)
 
 ### Validation
 
@@ -93,8 +93,8 @@
 | CONN-01 | Phase 3 | Complete |
 | CONN-02 | Phase 3 | Complete |
 | CONN-03 | Phase 3 | Complete |
-| BEAT-01 | Phase 4 | Pending |
-| BEAT-02 | Phase 4 | Pending |
+| BEAT-01 | Phase 4 | Complete |
+| BEAT-02 | Phase 4 | Complete |
 | TEST-01 | Phase 5 | Pending |
 | TEST-02 | Phase 5 | Pending |
 | TEST-03 | Phase 5 | Pending |
