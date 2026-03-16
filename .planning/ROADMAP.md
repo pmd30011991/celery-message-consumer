@@ -58,7 +58,7 @@ Plans:
   4. Celery's `blueprint.restart()` correctly rebuilds all handlers on the fresh connection without requiring a full worker restart.
 **Plans:** 1/1 plans complete
 Plans:
-- [ ] 03-01-PLAN.md — TDD reconnect hardening: stale handler reset, callback guards, prefork fallback
+- [x] 03-01-PLAN.md — TDD reconnect hardening: stale handler reset, callback guards, prefork fallback
 
 ### Phase 4: Heartbeat Safety Net
 **Goal**: AMQP heartbeats are maintained even during sustained periods of high pool dispatch load, through a dedicated heartbeat greenlet independent of the listener loop.
@@ -70,7 +70,7 @@ Plans:
   3. The heartbeat greenlet is only spawned when `c.connection.heartbeat` is set (non-zero); no greenlet is created for connections without a heartbeat configured.
 **Plans:** 1/1 plans complete
 Plans:
-- [ ] 04-01-PLAN.md — TDD heartbeat safety-net greenlet (spawn, guard, kill lifecycle)
+- [x] 04-01-PLAN.md — TDD heartbeat safety-net greenlet (spawn, guard, kill lifecycle)
 
 ### Phase 5: Validation
 **Goal**: Integration and unit tests confirm correct pool dispatch behavior, connection stability, and callback correctness across supported Celery versions — regressions are caught before they ship.
@@ -81,7 +81,10 @@ Plans:
   2. An integration test confirms the RabbitMQ connection stays alive (no heartbeat drop) during a handler that sleeps for longer than the heartbeat interval.
   3. Unit tests for `_on_pool_success` and `_on_pool_error` assert the correct ack/retry/archive call is made for each path without requiring a live broker.
   4. The `error_callback` signature is verified against the installed Celery version (3.x and 4.x/5.x differ); a compatibility shim or test guard prevents silent failures.
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 05-01-PLAN.md — Callback unit tests and Celery version compat (TEST-03, TEST-04)
+- [ ] 05-02-PLAN.md — Integration tests with Docker Compose RabbitMQ (TEST-01, TEST-02)
 
 ## Progress
 
@@ -96,4 +99,4 @@ Note: Phase 2 and Phase 3 are independent of each other (both depend only on Pha
 | 2. Backpressure | 1/1 | Complete   | 2026-03-11 |
 | 3. Reconnect Hardening | 1/1 | Complete   | 2026-03-11 |
 | 4. Heartbeat Safety Net | 1/1 | Complete   | 2026-03-12 |
-| 5. Validation | 0/TBD | Not started | - |
+| 5. Validation | 0/2 | Planning complete | - |
