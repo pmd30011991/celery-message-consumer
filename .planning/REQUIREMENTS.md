@@ -42,8 +42,8 @@
 
 - [ ] **TEST-01**: Integration test confirms messages processed by pool greenlet, not listener thread
 - [ ] **TEST-02**: Integration test confirms connection stays alive during long-running handler
-- [ ] **TEST-03**: Unit tests for `_on_pool_success` and `_on_pool_error` callback paths
-- [ ] **TEST-04**: Celery version compatibility verified (3.x and 4.x `error_callback` signature)
+- [x] **TEST-03**: Unit tests for `_on_pool_success` and `_on_pool_error` callback paths
+- [x] **TEST-04**: Celery version compatibility verified (3.x and 4.x `error_callback` signature)
 
 ## v2 Requirements
 
@@ -97,8 +97,8 @@
 | BEAT-02 | Phase 4 | Complete |
 | TEST-01 | Phase 5 | Pending |
 | TEST-02 | Phase 5 | Pending |
-| TEST-03 | Phase 5 | Pending |
-| TEST-04 | Phase 5 | Pending |
+| TEST-03 | Phase 5 | Complete |
+| TEST-04 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 22 total

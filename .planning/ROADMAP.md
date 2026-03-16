@@ -81,7 +81,7 @@ Plans:
   2. An integration test confirms the RabbitMQ connection stays alive (no heartbeat drop) during a handler that sleeps for longer than the heartbeat interval.
   3. Unit tests for `_on_pool_success` and `_on_pool_error` assert the correct ack/retry/archive call is made for each path without requiring a live broker.
   4. The `error_callback` signature is verified against the installed Celery version (3.x and 4.x/5.x differ); a compatibility shim or test guard prevents silent failures.
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 05-01-PLAN.md — Callback unit tests and Celery version compat (TEST-03, TEST-04)
 - [ ] 05-02-PLAN.md — Integration tests with Docker Compose RabbitMQ (TEST-01, TEST-02)
@@ -99,4 +99,4 @@ Note: Phase 2 and Phase 3 are independent of each other (both depend only on Pha
 | 2. Backpressure | 1/1 | Complete   | 2026-03-11 |
 | 3. Reconnect Hardening | 1/1 | Complete   | 2026-03-11 |
 | 4. Heartbeat Safety Net | 1/1 | Complete   | 2026-03-12 |
-| 5. Validation | 0/2 | Planning complete | - |
+| 5. Validation | 1/2 | In Progress|  |

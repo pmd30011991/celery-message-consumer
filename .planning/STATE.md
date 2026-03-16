@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 5 context gathered
-last_updated: "2026-03-16T14:43:58.570Z"
+stopped_at: Completed 05-01-PLAN.md
+last_updated: "2026-03-16T15:13:32.770Z"
 last_activity: 2026-03-11 — 01-01 test scaffold complete
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 7
+  completed_plans: 6
   percent: 50
 ---
 
@@ -55,6 +55,7 @@ Progress: [█████░░░░░] 50%
 | Phase 02-backpressure P01 | 2 | 2 tasks | 3 files |
 | Phase 03-reconnect-hardening P01 | 119 | 2 tasks | 2 files |
 | Phase 04-heartbeat-safety-net P01 | 4 | 2 tasks | 2 files |
+| Phase 05-validation P01 | 6 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,8 @@ Recent decisions affecting current work:
 - [Phase 04-heartbeat-safety-net]: _spawn/_sleep module-level: testable without monkeypatching entire libraries
 - [Phase 04-heartbeat-safety-net]: eventlet->gevent->None fallback order matches existing Celery pool preference; _spawn=None skips greenlet creation safely
 - [Phase 04-heartbeat-safety-net]: _heartbeat_loop is module-level function (no self reference) — pure inputs: connection + interval
+- [Phase 05-validation]: Rule 1 auto-fix: _on_pool_error routing block wrapped in try/except Exception to prevent retry()/archive() errors from propagating out of the error callback
+- [Phase 05-validation]: Tests use fresh venv /tmp/celery-test-venv as original /tmp/celery-consumer-venv has corrupted pytest install
 
 ### Pending Todos
 
@@ -94,6 +97,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-16T14:43:58.565Z
-Stopped at: Phase 5 context gathered
-Resume file: .planning/phases/05-validation/05-CONTEXT.md
+Last session: 2026-03-16T15:13:32.768Z
+Stopped at: Completed 05-01-PLAN.md
+Resume file: None
