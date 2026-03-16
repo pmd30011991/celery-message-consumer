@@ -470,6 +470,11 @@ class AMQPRetryHandler(object):
                         tb=traceback.format_tb(tb) if tb else '',
                     )
                 )
+        except Exception:
+            _logger.warning(
+                "Error routing message for '%s' during error callback",
+                self.routing_key, exc_info=True
+            )
         finally:
             self._django_cleanup()
             if not message.acknowledged:
