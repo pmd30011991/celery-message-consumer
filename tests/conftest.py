@@ -7,6 +7,12 @@ No live broker needed -- all AMQP operations are mocked.
 import pytest
 from unittest.mock import MagicMock, patch, PropertyMock
 
+
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "integration: marks tests requiring a live RabbitMQ broker (deselect with '-m \"not integration\"')"
+    )
+
 # ---------------------------------------------------------------------------
 # Django must be configured before any event_consumer import happens,
 # because event_consumer/settings.py does `from django.conf import settings`
